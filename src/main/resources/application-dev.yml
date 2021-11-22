@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.200.76:3306/einspect?useSSL=false&characterEncoding=UTF-8&useUnicode=true
+    username:  root
+    password:  root
+#  redis:
+#    database: 0
+#    host: ${REDIS_HOST:127.0.0.1}
+#    port: ${REDIS_PORT:6379}
+#    password: ${REDIS_PASSWORD:ZQxP#GXT}
+#  rabbitmq:
+#    addresses: ${RABBIT_MQ_ADDRESSES:127.0.0.1:5672}
+#    username: ${RABBIT_MQ_USERNAME:guest}
+#    password: ${RABBIT_MQ_PASSWORD:guest}
+
