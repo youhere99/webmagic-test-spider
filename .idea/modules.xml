@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/webmagic-test-spider.iml" filepath="$PROJECT_DIR$/.idea/webmagic-test-spider.iml" />
+      <module fileurl="file://$PROJECT_DIR$/webmagic-test-spider.iml" filepath="$PROJECT_DIR$/webmagic-test-spider.iml" />
     </modules>
   </component>
 </project>

@@ -37,6 +37,28 @@ public class JXDocumentTest {
     private ClassLoader loader = getClass().getClassLoader();
     private Logger logger = LoggerFactory.getLogger(JXDocumentTest.class);
 
+    /**
+     * d_test.html 来源于 https://book.douban.com/tag/%E4%BA%92%E8%81%94%E7%BD%91
+     * <p>
+     * 为了测试各种可能情况，ul[@class='subject-list']节点以及其下内容被复制了一份出来，并修改部分书名前缀为'T2-'以便区分
+     */
+    @DataProvider
+    public static Object[][] dataOfXpathAndexpect() {
+        return new Object[][]{
+                {"//ul[@class='subject-list']/li[position()<3][last()]/div/h2/allText()", "黑客与画家 : 硅谷创业之父Paul Graham文集T2-黑客与画家 : 硅谷创业之父Paul Graham文集"},
+                {"//ul[@class='subject-list']/li[first()]/div/h2/allText()", "失控 : 全人类的最终命运和结局T2-失控 : 全人类的最终命运和结局"},
+                {"//ul[@class='subject-list']/li[./div/div/span[@class='pl']/num()>(1000+90*(2*50))][last()][1]/div/h2/allText()", "长尾理论长尾理论"},
+                {"//ul[@class='subject-list']/li[self::li/div/div/span[@class='pl']/num()>10000][-1]/div/h2/allText()", "长尾理论长尾理论"},
+                {"//ul[@class='subject-list']/li[contains(self::li/div/div/span[@class='pl']//text(),'14582')]/div/h2//text()", "黑客与画家: 硅谷创业之父Paul Graham文集T2-黑客与画家: 硅谷创业之父Paul Graham文集"},
+                {"//ul[@class='subject-list']/li[contains(./div/div/span[@class='pl']//text(),'14582')]/div/h2//text()", "黑客与画家: 硅谷创业之父Paul Graham文集T2-黑客与画家: 硅谷创业之父Paul Graham文集"},
+                {"//*[@id=\"subject_list\"]/ul/li[2]/div[2]/h2/a//text()", "黑客与画家: 硅谷创业之父Paul Graham文集T2-黑客与画家: 硅谷创业之父Paul Graham文集"},
+                {"//ul[@class]", 3L},
+                {"//a[@id]/@href", "https://www.douban.com/doumail/"},
+                {"//*[@id=\"subject_list\"]/ul[1]/li[8]/div[2]/div[2]/span[3]/num()", "3734.0"},
+                {"//a[@id]/@href | //*[@id=\"subject_list\"]/ul[1]/li[8]/div[2]/div[2]/span[3]/num()", "https://www.douban.com/doumail/3734.0"},
+        };
+    }
+
     @Before
     public void before() throws Exception {
         String html = "<html><body><script>console.log('aaaaa')</script><div class='test'>some body</div><div class='xiao'>Two</div></body></html>";
@@ -59,14 +81,14 @@ public class JXDocumentTest {
         String xpath = "//script[1]/text()";
         JXNode res = underTest.selNOne(xpath);
         Assert.assertNotNull(res);
-        Assert.assertEquals("console.log('aaaaa')",res.asString());
+        Assert.assertEquals("console.log('aaaaa')", res.asString());
     }
 
     @Test
     public void testNotMatchFilter() throws Exception {
         String xpath = "//div[contains(@class,'xiao')]/text()";
         JXNode node = underTest.selNOne(xpath);
-        Assert.assertEquals("Two",node.asString());
+        Assert.assertEquals("Two", node.asString());
     }
 
     @Test
@@ -75,51 +97,29 @@ public class JXDocumentTest {
             "//div[@class='paginator']/span[@class='next']/a/@href",
     })
     public void testXpath(String xpath) throws XpathSyntaxErrorException {
-        logger.info("current xpath: {}" , xpath);
+        logger.info("current xpath: {}", xpath);
         List<JXNode> rs = doubanTest.selN(xpath);
         for (JXNode n : rs) {
             if (!n.isString()) {
                 int index = n.asElement().siblingIndex();
-                logger.info("index = {}",index);
+                logger.info("index = {}", index);
             }
             logger.info(n.toString());
         }
     }
 
-    /**
-     * d_test.html 来源于 https://book.douban.com/tag/%E4%BA%92%E8%81%94%E7%BD%91
-     *
-     * 为了测试各种可能情况，ul[@class='subject-list']节点以及其下内容被复制了一份出来，并修改部分书名前缀为'T2-'以便区分
-     */
-    @DataProvider
-    public static Object[][] dataOfXpathAndexpect() {
-        return new Object[][] {
-                { "//ul[@class='subject-list']/li[position()<3][last()]/div/h2/allText()", "黑客与画家 : 硅谷创业之父Paul Graham文集T2-黑客与画家 : 硅谷创业之父Paul Graham文集" },
-                { "//ul[@class='subject-list']/li[first()]/div/h2/allText()", "失控 : 全人类的最终命运和结局T2-失控 : 全人类的最终命运和结局" },
-                { "//ul[@class='subject-list']/li[./div/div/span[@class='pl']/num()>(1000+90*(2*50))][last()][1]/div/h2/allText()", "长尾理论长尾理论" },
-                { "//ul[@class='subject-list']/li[self::li/div/div/span[@class='pl']/num()>10000][-1]/div/h2/allText()",   "长尾理论长尾理论" },
-                { "//ul[@class='subject-list']/li[contains(self::li/div/div/span[@class='pl']//text(),'14582')]/div/h2//text()",   "黑客与画家: 硅谷创业之父Paul Graham文集T2-黑客与画家: 硅谷创业之父Paul Graham文集" },
-                { "//ul[@class='subject-list']/li[contains(./div/div/span[@class='pl']//text(),'14582')]/div/h2//text()",   "黑客与画家: 硅谷创业之父Paul Graham文集T2-黑客与画家: 硅谷创业之父Paul Graham文集" },
-                { "//*[@id=\"subject_list\"]/ul/li[2]/div[2]/h2/a//text()",   "黑客与画家: 硅谷创业之父Paul Graham文集T2-黑客与画家: 硅谷创业之父Paul Graham文集" },
-                { "//ul[@class]",   3L },
-                { "//a[@id]/@href",   "https://www.douban.com/doumail/" },
-                { "//*[@id=\"subject_list\"]/ul[1]/li[8]/div[2]/div[2]/span[3]/num()",   "3734.0" },
-                { "//a[@id]/@href | //*[@id=\"subject_list\"]/ul[1]/li[8]/div[2]/div[2]/span[3]/num()",   "https://www.douban.com/doumail/3734.0" },
-        };
-    }
-
     @UseDataProvider("dataOfXpathAndexpect")
     @Test
-    public void testXpathAndAssert(String xpath,Object expect) throws XpathSyntaxErrorException {
-        logger.info("current xpath: {}" , xpath);
+    public void testXpathAndAssert(String xpath, Object expect) throws XpathSyntaxErrorException {
+        logger.info("current xpath: {}", xpath);
         List<JXNode> rs = doubanTest.selN(xpath);
-        if (expect instanceof String){
-            String res = StringUtils.join(rs,"");
+        if (expect instanceof String) {
+            String res = StringUtils.join(rs, "");
             logger.info(res);
-            Assert.assertEquals(expect,res);
-        }else if (expect instanceof Number){
+            Assert.assertEquals(expect, res);
+        } else if (expect instanceof Number) {
             long size = (long) expect;
-            Assert.assertEquals(size,rs.size());
+            Assert.assertEquals(size, rs.size());
         }
     }
 
@@ -128,7 +128,7 @@ public class JXDocumentTest {
             "//ul[@class='subject-list']/li[position()<3]"
     })
     public void testJXNode(String xpath) throws XpathSyntaxErrorException {
-        logger.info("current xpath: {}" , xpath);
+        logger.info("current xpath: {}", xpath);
         List<JXNode> jxNodeList = doubanTest.selN(xpath);
         Set<String> expect = new HashSet<>();
         //第一个 ul 中的
@@ -154,9 +154,9 @@ public class JXDocumentTest {
             "//ul[@class='subject-list']"
     })
     public void testRecursionNode(String xpath) throws XpathSyntaxErrorException {
-        logger.info("current xpath: {}" , xpath);
+        logger.info("current xpath: {}", xpath);
         List<JXNode> jxNodeList = doubanTest.selN(xpath);
-        logger.info("size = {}",jxNodeList.size());
+        logger.info("size = {}", jxNodeList.size());
         // 有两个ul，下面的是为了测试特意复制添加的
         Assert.assertEquals(2, jxNodeList.size());
     }
@@ -167,15 +167,15 @@ public class JXDocumentTest {
             "/body/div/div/h1/text()"
     })
     public void absolutePathTest(String xpath) throws XpathSyntaxErrorException {
-        logger.info("current xpath: {}" , xpath);
+        logger.info("current xpath: {}", xpath);
         List<JXNode> jxNodeList = doubanTest.selN(xpath);
-        logger.info("size = {}，res ={}",jxNodeList.size(),jxNodeList);
+        logger.info("size = {}，res ={}", jxNodeList.size(), jxNodeList);
     }
 
     @Test
     public void testAs() throws XpathSyntaxErrorException {
         List<JXNode> jxNodeList = custom.selN("//b[contains(text(),'性别')]/parent::*/text()");
-        Assert.assertEquals("男",StringUtils.join(jxNodeList,""));
+        Assert.assertEquals("男", StringUtils.join(jxNodeList, ""));
         for (JXNode jxNode : jxNodeList) {
             logger.info(jxNode.toString());
         }
@@ -185,12 +185,12 @@ public class JXDocumentTest {
      * fix https://github.com/zhegexiaohuozi/JsoupXpath/issues/33
      */
 //    @Test
-    public void testNotObj(){
+    public void testNotObj() {
         JXDocument doc = JXDocument.createByUrl("https://www.gxwztv.com/61/61514/");
 //        List<JXNode> nodes = doc.selN("//*[@id=\"chapters-list\"]/li[@style]");
         List<JXNode> nodes = doc.selN("//*[@id=\"chapters-list\"]/li[not(@style)]");
-        for (JXNode node:nodes){
-            logger.info("r = {}",node);
+        for (JXNode node : nodes) {
+            logger.info("r = {}", node);
         }
     }
 
@@ -198,7 +198,7 @@ public class JXDocumentTest {
      * fix https://github.com/zhegexiaohuozi/JsoupXpath/issues/34
      */
     @Test
-    public void testAttrAtRoot(){
+    public void testAttrAtRoot() {
         String content = "<html>\n" +
                 " <head></head>\n" +
                 " <body>\n" +
@@ -207,18 +207,18 @@ public class JXDocumentTest {
                 "</html>";
         JXDocument doc = JXDocument.create(content);
         List<JXNode> nodes = doc.selN("//@href");
-        for (JXNode node:nodes){
-            logger.info("r = {}",node);
+        for (JXNode node : nodes) {
+            logger.info("r = {}", node);
         }
     }
 
     @Test
-    public void testA(){
+    public void testA() {
         String content = "<span style=\"color: #5191ce;\" >网页设计师</span>";
         JXDocument doc = JXDocument.create(content);
         List<JXNode> nodes = doc.selN("//*[text()='网页设计师']");
-        for (JXNode node:nodes){
-            logger.info("r = {}",node);
+        for (JXNode node : nodes) {
+            logger.info("r = {}", node);
         }
     }
 
@@ -226,30 +226,30 @@ public class JXDocumentTest {
      * fix https://github.com/zhegexiaohuozi/JsoupXpath/issues/52
      */
     @Test
-    public void fixTextBehaviorTest(){
+    public void fixTextBehaviorTest() {
         String html = "<p><span class=\"text-muted\">分类：</span>动漫<span class=\"split-line\"></span><span class=\"text-muted hidden-xs\">地区：</span>日本<span class=\"split-line\"></span><span class=\"text-muted hidden-xs\">年份：</span>2010</p>";
         JXDocument jxDocument = JXDocument.create(html);
         List<JXNode> jxNodes = jxDocument.selN("//text()[3]");
-        String actual = StringUtils.join(jxNodes,"");
-        logger.info("actual = {}",actual);
+        String actual = StringUtils.join(jxNodes, "");
+        logger.info("actual = {}", actual);
         Assert.assertEquals("2010", actual);
         List<JXNode> nodes = jxDocument.selN("//text()");
-        String allText = StringUtils.join(nodes,"");
-        Assert.assertEquals("分类：动漫地区：日本年份：2010",allText);
-        logger.info("all = {}",allText);
+        String allText = StringUtils.join(nodes, "");
+        Assert.assertEquals("分类：动漫地区：日本年份：2010", allText);
+        logger.info("all = {}", allText);
     }
 
     /**
      * fix https://github.com/zhegexiaohuozi/JsoupXpath/issues/44
      */
     @Test
-    public void fixTextElNoParentTest(){
-        String test="<div class='a'> a <div>need</div> <div class='e'> not need</div> c </div>";
+    public void fixTextElNoParentTest() {
+        String test = "<div class='a'> a <div>need</div> <div class='e'> not need</div> c </div>";
         JXDocument j = JXDocument.create(test);
         List<JXNode> l = j.selN("//div[@class='a']//text()[not(ancestor::div[@class='e'])]");
         Set<String> finalRes = new HashSet<>();
-        for (JXNode i : l){
-            logger.info("{}",i.toString());
+        for (JXNode i : l) {
+            logger.info("{}", i.toString());
             finalRes.add(i.asString());
         }
         Assert.assertFalse(finalRes.contains("not need"));
@@ -261,7 +261,7 @@ public class JXDocumentTest {
      * fix https://github.com/zhegexiaohuozi/JsoupXpath/issues/53
      */
     @Test
-    public void fixIssue53(){
+    public void fixIssue53() {
         String content = "<li class=\"res-book-item\" data-bid=\"1018351389\" data-rid=\"1\"> \n" +
                 " <div class=\"book-img-box\"> <a href=\"//book.qidian.com/info/1018351389\" target=\"_blank\" data-eid=\"qd_S04\" data-algrid=\"0.0.0\" data-bid=\"1018351389\"><img src=\"//bookcover.yuewen.com/qdbimg/349573/1018351389/150\"></a> \n" +
                 " </div> \n" +
@@ -280,13 +280,13 @@ public class JXDocumentTest {
                 " </div> </li>";
         JXDocument j = JXDocument.create(content);
         List<JXNode> l = j.selN("//*[text()='总字数']//text()");
-        Assert.assertEquals(2,l.size());
-        Assert.assertEquals("4497",l.get(0).asString());
-        Assert.assertEquals("总字数",l.get(1).asString());
+        Assert.assertEquals(2, l.size());
+        Assert.assertEquals("4497", l.get(0).asString());
+        Assert.assertEquals("总字数", l.get(1).asString());
     }
 
     @Test
-    public void fixIssue53B(){
+    public void fixIssue53B() {
         String content = "<li class=\"res-book-item\" data-bid=\"1018351389\" data-rid=\"1\"> \n" +
                 " <div class=\"book-img-box\"> <a href=\"//book.qidian.com/info/1018351389\" target=\"_blank\" data-eid=\"qd_S04\" data-algrid=\"0.0.0\" data-bid=\"1018351389\"><img src=\"//bookcover.yuewen.com/qdbimg/349573/1018351389/150\"></a> \n" +
                 " </div> \n" +
@@ -308,9 +308,9 @@ public class JXDocumentTest {
         Assert.assertEquals(2, l.size());
         // xpath索引值从1开始
         List<JXNode> l2 = j.selN("//*[text()='总字数']//text()[0]");
-        Assert.assertEquals(0,l2.size());
+        Assert.assertEquals(0, l2.size());
         List<JXNode> l3 = j.selN("//*[text()='总字数']//text()[2]");
-        Assert.assertEquals(0,l3.size());
+        Assert.assertEquals(0, l3.size());
 
     }
 

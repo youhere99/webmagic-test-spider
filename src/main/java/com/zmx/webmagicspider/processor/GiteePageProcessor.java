@@ -15,6 +15,7 @@ import us.codecraft.webmagic.selector.Selectable;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Slf4j
 @Component(value = "giteePageProcessor")
 public class GiteePageProcessor implements PageProcessor {
@@ -25,7 +26,7 @@ public class GiteePageProcessor implements PageProcessor {
     @Override
     public void process(Page page) {
         List<Selectable> nodes = page.getHtml().xpath("//*[@id=\"open-source-vip-page\"]/div[2]/div/div//a").nodes();
-        for(Selectable s:nodes ){
+        for (Selectable s : nodes) {
             Document document = Jsoup.parse(s.toString());
             page.putField(document.getElementsByTag("a").get(0).child(0).child(0).attr("title"), document.getElementsByTag("a").get(0).child(1).child(0).attr("title"));
         }
@@ -34,12 +35,12 @@ public class GiteePageProcessor implements PageProcessor {
 //        }
         List<Selectable> a = page.getHtml().xpath("//a").nodes();
         ArrayList<String> list = Lists.newArrayList();
-        for(Selectable s:a){
+        for (Selectable s : a) {
             Elements a1 = Jsoup.parseBodyFragment(s.toString()).select("a");
 
-            list.add(StringUtils.contains( a1.attr("href").toString(),"http")?a1.attr("href"):"http://gitee.com/"+a1.attr("href"));
+            list.add(StringUtils.contains(a1.attr("href").toString(), "http") ? a1.attr("href") : "http://gitee.com/" + a1.attr("href"));
         }
-            page.addTargetRequests(list);
+        page.addTargetRequests(list);
     }
 
     @Override
